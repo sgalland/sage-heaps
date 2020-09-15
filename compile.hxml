@@ -1,0 +1,7 @@
+-lib heaps
+-lib hlsdl
+-lib sage-agi
+-hl build/hl/main.hl
+-main Main
+-cp src
+-D windowSize=320x200
