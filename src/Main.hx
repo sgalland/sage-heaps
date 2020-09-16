@@ -1,3 +1,5 @@
+import KeyboardMapping.KBM;
+import hxd.Event.EventKind;
 import h2d.Graphics;
 import hxd.BitmapData;
 import sage.agi.helpers.AGIColor;
@@ -10,11 +12,13 @@ import sage.agi.interpreter.AGIInterpreter;
 class Main extends hxd.App {
 	static final MAX_WIDTH:Int = 320;
 	static final MAX_HEIGHT:Int = 200;
+	var kbm:KBM = new KBM();
 
 	override function init() {
-		Sys.setCwd("./build/hl");
+		hxd.Window.getInstance().addEventTarget(onEvent);
+		// Sys.setCwd("./build/hl");
 		AGIInterpreter.instance.initialize();
-		AGIInterpreter.instance.run();
+		AGIInterpreter.instance.run(); // update via run so that CURRENT_PIC works
 
 		var x:Int = 0;
 		var y:Int = 0;
@@ -32,7 +36,7 @@ class Main extends hxd.App {
 				index++;
 			}
 		}
-		
+
 		var tile = Tile.fromBitmap(bmpdata);
 		bmpdata.dispose();
 
@@ -42,7 +46,17 @@ class Main extends hxd.App {
 	}
 
 	override function update(dt:Float) {
-		trace(dt);
+		AGIInterpreter.instance.run();
+	}
+
+	function onEvent(event:hxd.Event) {
+		switch (event.kind) {
+			case EKeyDown: 
+				var mapping = kbm.get(event.charCode);
+				trace('char: ${mapping}');
+			// case EKeyUp: trace(event.toString());
+			case _: null;
+		}
 	}
 
 	static function main() {
