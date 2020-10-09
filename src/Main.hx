@@ -1,3 +1,6 @@
+import sage.agi.AGIEvent;
+import sage.agi.AGIEvent.KBM;
+import hxd.Event.EventKind;
 import h2d.Graphics;
 import hxd.BitmapData;
 import sage.agi.helpers.AGIColor;
@@ -12,8 +15,16 @@ class Main extends hxd.App {
 	static final MAX_HEIGHT:Int = 200;
 
 	override function init() {
+		var stage = hxd.Window.getInstance();
+		stage.resize(MAX_WIDTH, MAX_HEIGHT);
+
+		hxd.Window.getInstance().addEventTarget(onEvent);
 		Sys.setCwd("./build/hl");
 		AGIInterpreter.instance.initialize();
+		AGIInterpreter.instance.run(); // update via run so that CURRENT_PIC works
+	}
+
+	override function update(dt:Float) {
 		AGIInterpreter.instance.run();
 
 		var x:Int = 0;
@@ -32,17 +43,38 @@ class Main extends hxd.App {
 				index++;
 			}
 		}
-		
+
 		var tile = Tile.fromBitmap(bmpdata);
 		bmpdata.dispose();
 
+		var bitmap:Bitmap = new Bitmap(tile, s2d);
+		bitmap.scale(scale);
+
 		g.clear();
-		g.drawTile(0, 0, tile);
+		g.drawTile(0, 0, bitmap.tile);
 		g.endFill();
 	}
 
-	override function update(dt:Float) {
-		trace(dt);
+	var scale:Float = 1;
+
+	function onEvent(event:hxd.Event) {
+		switch (event.kind) {
+			case EKeyDown:
+				trace(event.keyCode);
+				AGIInterpreter.instance.KEYBOARD_BUFFER.push(new AGIKeyboardEvent(event.keyCode));
+
+				// var stage = hxd.Window.getInstance();
+				// if (event.keyCode == hxd.Key.UP) {
+				// 	scale *= 2;
+				// 	stage.resize(MAX_WIDTH * Std.int(scale), MAX_HEIGHT * Std.int(scale));
+				// } else if (event.keyCode == hxd.Key.DOWN) {
+				// 	if (scale != 1)
+				// 		scale /= 2;
+				// 	stage.resize(MAX_WIDTH * Std.int(scale), MAX_HEIGHT * Std.int(scale));
+				// }
+			case _:
+				null;
+		}
 	}
 
 	static function main() {
